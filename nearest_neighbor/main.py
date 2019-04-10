@@ -15,18 +15,29 @@ print(Yte.shape)
 Xtr_rows = Xtr.reshape(Xtr.shape[0], 32 * 32 * 3)
 Xte_rows = Xte.reshape(Xte.shape[0], 32 * 32 * 3)
 
-# Now that we have all images stretched out as rows,
-# here is how we could train and evaluate a classifier.
+Xval_rows = Xtr_rows[:1000, :]
+Yval = Ytr[:1000]
+Xtr_rows = Xtr_rows[1000:, :]
+Ytr =Ytr[1000:]
 
-# Create a Nearest Neighbor classifier class
-nn = NearestNeighbor() 
+# find hyperparameters that work best on the validation set
+validation_accuracies = []
+for k in [3, 5, 10, 20, 50, 100]:
+    # Use a particular value of k and evaluation on validation data
+    # Now that we have all images stretched out as rows,
+    # here is how we could train and evaluate a classifier.
 
-# Train the classifier on the training images and labels
-nn.train(Xtr_rows, Ytr)
+    # Create a Nearest Neighbor classifier class
+    nn = NearestNeighbor() 
 
-# Predict labels on the test images
-Yte_predict = nn.predict(Xte_rows)
+    # Train the classifier on the training images and labels
+    nn.train(Xtr_rows, Ytr)
 
-# And now print the classification accuracy, which is the average number
-# of examples that are correctly predicted (i.e. label matches)
-print(f'accuracy: {np.mean(Yte_predict == Yte)}')
+    # Predict labels on the test images
+    # here we assume a modified NearestNeighor class that can take a k as input
+    Yval_predict = nn.predict(Xval_rows, k=k)
+    acc = np.mean(Yval_predict == Yval)
+
+    print(f'accuracy: {acc}')
+    
+    validation_accuracies.append((k, acc))
